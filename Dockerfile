@@ -22,4 +22,5 @@ WORKDIR /home/app
 
 RUN python -m venv venv
 RUN . venv/bin/activate
-RUN python -m pip install textract
+
+RUN python -m pip install textract pytesseract
