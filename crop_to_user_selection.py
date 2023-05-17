@@ -57,7 +57,7 @@ class RectangleSelector:
             self.start_y = None
             self.both_selected = False
 
-def display_image_with_selection(image_path):
+def crop_to_user_selection(image_path, cropped_image_path):
     # Open the image using PIL
     img = Image.open(image_path)
 
@@ -82,12 +82,9 @@ def display_image_with_selection(image_path):
         # Crop the image based on the selected region
         cropped_img = img.crop((x1, y1, x2, y2))
 
-        # Display the cropped image
-        cropped_img.show()
-
         # Save the cropped image to a file
-        cropped_img.save('cropped_image.jpg')
+        cropped_img.save(cropped_image_path)
 
 # Example usage
-image_path = 'out_2.jpeg'
-display_image_with_selection(image_path)
+image_path = '1.JPG'
+crop_to_user_selection(image_path, 'cropped_image.jpg')
