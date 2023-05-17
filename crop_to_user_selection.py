@@ -10,6 +10,7 @@ class RectangleSelector:
         self.rect = None
         self.start_x = None
         self.start_y = None
+        self.both_selected = False
 
         self.ax.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.ax.figure.canvas.mpl_connect('key_press_event', self.on_key_press)
@@ -19,6 +20,9 @@ class RectangleSelector:
             return
 
         if event.button == 1:  # Left mouse button
+            if self.both_selected: # If a rectangle has been already selected, clear it
+                self.remove_rectangle()
+
             if self.rect is None:  # First corner
                 self.start_x = event.xdata
                 self.start_y = event.ydata
@@ -26,6 +30,7 @@ class RectangleSelector:
                 self.ax.add_patch(self.rect)
             else:  # Second corner
                 self.update_rectangle(event.xdata, event.ydata)
+                self.both_selected = True
 
         elif event.button == 3:  # Right mouse button
             self.remove_rectangle()
@@ -50,6 +55,7 @@ class RectangleSelector:
             self.rect = None
             self.start_x = None
             self.start_y = None
+            self.both_selected = False
 
 def display_image_with_selection(image_path):
     # Open the image using PIL
