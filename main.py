@@ -1,26 +1,14 @@
+import pandas as pd
 import pytesseract
 
-print('langs:')
-print(pytesseract.get_languages())
-
 file_name = '5.jpeg'
-text = pytesseract.image_to_string(file_name)
-print(text)
+tsv_file_name = 'test.tsv'
 
-data = pytesseract.image_to_boxes(file_name) #, output_type='dict', )
-print(data)
-
-
-data = pytesseract.image_to_data(file_name) #, output_type='dict', )
-print(data)
-with open('test.tsv', 'w+b') as f:
+data = pytesseract.image_to_data(file_name, output_type=pytesseract.Output.STRING)
+with open(tsv_file_name, 'w') as f:
     f.write(data)
 
+df = pd.read_csv(tsv_file_name, sep="\t", lineterminator="\n", verbose=True)
 
-pdf = pytesseract.image_to_pdf_or_hocr(file_name, extension='pdf')
-with open('test.pdf', 'w+b') as f:
-    f.write(pdf)
-
-xml = pytesseract.image_to_alto_xml(file_name)
-with open('test.xml', 'w+b') as f:
-    f.write(pdf)
+print(df["text"])
+print(df["conf"])
