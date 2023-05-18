@@ -33,8 +33,9 @@ def separate_numbers_into_buckets(numbers: List[int], max_deviation=5):
 
     return buckets
 
+def extract_column_data(image_path, selection, confidence=60, line_word_max_deviation=5):
+    x1, y1, x2, y2 = selection
 
-def extract_column_data(image_path, confidence=60, line_word_max_deviation=5):
     # Read the image using OpenCV
     image = cv2.imread(image_path)
 
@@ -52,8 +53,10 @@ def extract_column_data(image_path, confidence=60, line_word_max_deviation=5):
             w = int(data['width'][i])
             h = int(data['height'][i])
 
-            y_positions.append(y)
-            processed_data[y] = WordData(text, data['conf'][i], x, y, w, h)
+            # Get only selected data
+            if x >= x1 and x < x2 and y >= y1 and y < y2:
+                y_positions.append(y)
+                processed_data[y] = WordData(text, data['conf'][i], x, y, w, h)
 
     # Now we will extract the words lying in a same line
     line_words = {}
@@ -78,6 +81,6 @@ def extract_column_data(image_path, confidence=60, line_word_max_deviation=5):
         line_words[line_idx] = line_text
         print(f"Line {line_idx}: {line_words[line_idx]}\n")
 
-# # Example usage
-# image_path = '1_col1.jpg'
-# extract_column_data(image_path, line_word_max_deviation=16, confidence=60)
+# Example usage
+image_path = '1_col1.jpg'
+extract_column_data(image_path, (0, 0, 500, 5000), line_word_max_deviation=16, confidence=60)
