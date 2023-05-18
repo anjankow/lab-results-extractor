@@ -16,7 +16,8 @@ RUN apt update && apt install -y \
     sox \
     libjpeg-dev \
     swig \
-    libpulse-dev
+    libpulse-dev \
+    vim
 
 WORKDIR /home/app
 
