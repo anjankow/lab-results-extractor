@@ -26,7 +26,7 @@ def draw_word_boxes(image_path: str, output_path: str, confidence: int, config="
     # Save the image with word boxes
     plt.imsave(output_path, image_rgb)
 
-# Example usage
-image_path = '1.JPG'
-output_path = 'tmp.jpg'
-draw_word_boxes(image_path, output_path, 40)
+# # Example usage
+# image_path = '1.JPG'
+# output_path = 'tmp.jpg'
+# draw_word_boxes(image_path, output_path, 40)

@@ -3,7 +3,7 @@
 from typing import Tuple
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-from PIL import Image
+from PIL import Image, ImageOps
 
 class RectangleSelector:
     def __init__(self, ax):
@@ -52,14 +52,15 @@ class RectangleSelector:
             self.start_x = None
             self.start_y = None
 
-def user_select_image_area(image_path) -> tuple:
+def user_select_image_area(image_path, title='Select a region of interest') -> tuple:
     # Open the image using PIL
     img = Image.open(image_path)
+    img = ImageOps.exif_transpose(img)
 
     # Display the image using matplotlib
     fig, ax = plt.subplots()
     ax.imshow(img)
-    ax.set_title('Select a region of interest')
+    ax.set_title(title)
 
     # Create the rectangle selector
     rectangle_selector = RectangleSelector(ax)
@@ -89,6 +90,6 @@ def crop_image(image_path, cropped_image_path, coordinates_tuple: tuple):
     cropped_img.save(cropped_image_path)
 
 
-# Example usage
-image_path = '1.JPG'
-user_select_image_area(image_path)
+# # Example usage
+# image_path = '1.JPG'
+# user_select_image_area(image_path)

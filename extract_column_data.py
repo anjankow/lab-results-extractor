@@ -78,6 +78,6 @@ def extract_column_data(image_path, confidence=60, line_word_max_deviation=5):
         line_words[line_idx] = line_text
         print(f"Line {line_idx}: {line_words[line_idx]}\n")
 
-# Example usage
-image_path = '1_col1.jpg'
-extract_column_data(image_path, line_word_max_deviation=16, confidence=60)
+# # Example usage
+# image_path = '1_col1.jpg'
+# extract_column_data(image_path, line_word_max_deviation=16, confidence=60)
