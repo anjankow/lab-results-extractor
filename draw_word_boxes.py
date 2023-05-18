@@ -3,7 +3,7 @@ import pytesseract
 import numpy as np
 import matplotlib.pyplot as plt
 
-def draw_word_boxes(image_path: str, output_path: str, confidence: int):
+def draw_word_boxes(image_path: str, output_path: str, confidence: int, config="--oem 3 --psm 6"):
     if confidence > 100 or confidence < 0:
         raise ValueError('Confidence value out of range')
 
@@ -12,7 +12,7 @@ def draw_word_boxes(image_path: str, output_path: str, confidence: int):
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # Apply OCR using pytesseract
-    data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT, config="--oem 3 --psm 6")
+    data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT, config=config)
 
     # Extract word-level bounding boxes and draw rectangles
     for i, word in enumerate(data['text']):
