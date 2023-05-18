@@ -4,11 +4,13 @@ import cv2
 import numpy as np
 
 class WordData:
-    def __init__(self, text: str, confidence: int, x: int, y: int):
+    def __init__(self, text: str, confidence: int, x: int, y: int, width: int, height: int):
         self.text = text
         self.confidence = confidence
         self.x = x
         self.y = y
+        self.width = width
+        self.height = height
 
 def separate_numbers_into_buckets(numbers: List[int], max_deviation=5):
     buckets = {}
@@ -47,24 +49,34 @@ def extract_column_data(image_path, confidence=60, line_word_max_deviation=5):
         if int(data['conf'][i]) > confidence:  # Filter out low confidence text
             x = int(data['left'][i])
             y = int(data['top'][i])
-            # w = data['width'][i]
-            # h = data['height'][i]
+            w = int(data['width'][i])
+            h = int(data['height'][i])
 
             y_positions.append(y)
-            processed_data[y] = WordData(text, data['conf'][i], x, y)
+            processed_data[y] = WordData(text, data['conf'][i], x, y, w, h)
 
     # Now we will extract the words lying in a same line
     line_words = {}
     buckets = separate_numbers_into_buckets(y_positions, line_word_max_deviation)
     for bucket_idx, y_positions in buckets.items():
-        words = [WordData]
+        words = {} # {position_x: WordData}, word within a single line
         for y in y_positions:
             word_data = processed_data[y]
-            words.append(word_data.text)
+            words[word_data.x] = word_data
         line_words[bucket_idx] = words
 
-    for line_idx, words in line_words.items():
-        print(f"Line: {line_idx}, words: {words}\n")
+        print(f"Bucket {bucket_idx}, words: {list(map(lambda word: word[1].text, words.items()))}")
+
+    for line_idx, words_dict in line_words.items():
+        print(line_idx)
+        print(words_dict)
+        line_text = ''
+        for _, word in sorted(words_dict.items()):
+            line_text += ' ' + word.text
+
+        print(f"Line {line_idx}: {line_text}")
+        line_words[line_idx] = line_text
+        print(f"Line {line_idx}: {line_words[line_idx]}\n")
 
 # Example usage
 image_path = '1_col1.jpg'
