@@ -52,13 +52,15 @@ class RectangleSelector:
             self.start_x = None
             self.start_y = None
 
-def user_select_image_area(image_path, title='Select a region of interest') -> tuple:
+def user_select_image_area(image_path, title='Select a region of interest')->Tuple[int, int, int, int]:
     # Open the image using PIL
     img = Image.open(image_path)
     img = ImageOps.exif_transpose(img)
 
     # Display the image using matplotlib
     fig, ax = plt.subplots()
+    manager = plt.get_current_fig_manager()
+    manager.full_screen_toggle()
     ax.imshow(img)
     ax.set_title(title)
 
@@ -75,9 +77,8 @@ def user_select_image_area(image_path, title='Select a region of interest') -> t
         x2 = x1 + rectangle_selector.rect.get_width()
         y2 = y1 + rectangle_selector.rect.get_height()
 
-        (x1, y1, x2, y2)
-    else:
-        None
+        return (x1, y1, x2, y2)
+
 
 def crop_image(image_path, cropped_image_path, coordinates_tuple: tuple):
     # Open the image using PIL
