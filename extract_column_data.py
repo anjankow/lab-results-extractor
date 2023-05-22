@@ -41,14 +41,14 @@ def separate_numbers_into_buckets(numbers: List[int], max_deviation=5):
 
     return buckets
 
-def extract_column_data(image_path, selection, skip_words=[], confidence=60, line_word_max_deviation=5)->List[TextPosition]:
+def extract_column_data(image_path, selection, skip_words: List[str]=[], confidence=60, line_word_max_deviation=5, config="--oem 3 --psm 6")->List[TextPosition]:
     selection_x1, selection_y1, selection_x2, selection_y2 = selection
 
     # Read the image using OpenCV
     image = cv2.imread(image_path)
 
     # Apply OCR using pytesseract
-    data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
+    data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT, config=config)
 
     # Collect all top values present in data to divide it to consecutive lines after.
     # Splitting into lines is done basing on y coordinates.
@@ -106,9 +106,9 @@ def extract_column_data(image_path, selection, skip_words=[], confidence=60, lin
 
 
 
-# Example usage
-image_path = '1_col1.jpg'
-data = extract_column_data(image_path, (0, 0, 5000, 5000), skip_words=["+", "-"], line_word_max_deviation=16, confidence=60)
+# # Example usage
+# image_path = '1_col1.jpg'
+# data = extract_column_data(image_path, (0, 0, 5000, 5000), line_word_max_deviation=16, confidence=60)
 
-for d in data:
-    print(d.text)
+# for d in data:
+#     print(d.text)

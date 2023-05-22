@@ -32,13 +32,16 @@ for i in [1]:
     # 1. Result labels
     labels_coordinates = user_select_image_area(image_to_show, 'Select result labels')
     # 2. Result numbers
-    results_coordinates = user_select_image_area(image_to_show, 'Select result numbers')
-    # 3. Units
-    units_coordinates = user_select_image_area(image_to_show, 'Select result units')
+    # results_coordinates = user_select_image_area(image_to_show, 'Select result numbers')
+    # # 3. Units
+    # units_coordinates = user_select_image_area(image_to_show, 'Select result units')
 
     # Now get data from these selections
-    draw_word_boxes(processed_image, processed_image, confidence)
-    print('Drew word boxes on user selected area')
+    labels = extract_column_data(processed_image, labels_coordinates, skip_words=['+', '-'], confidence=60, line_word_max_deviation=5, config="--oem 3 --psm 6")
+    print('Processed labels')
+    for l in labels:
+        print(f"({l.x1}, {l.y1}) {l.text}")
+
 
 
 
