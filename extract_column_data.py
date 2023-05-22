@@ -20,7 +20,11 @@ class TextPosition:
         self.x2 = x2
         self.y2 = y2
 
-def separate_numbers_into_buckets(numbers: List[int], max_deviation=5):
+    def equals(self, other)->bool:
+        return self.text == other.text and self.x1 == other.x1 and self.y2 == other.y2
+
+# returns {bucket_idx: List[numbers]}
+def separate_numbers_into_buckets(numbers: List[int], max_deviation=5)->Dict[int, int]:
     buckets = {}
 
     # Sort the numbers in ascending order
