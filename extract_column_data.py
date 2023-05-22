@@ -41,7 +41,7 @@ def separate_numbers_into_buckets(numbers: List[int], max_deviation=5):
 
     return buckets
 
-def extract_column_data(image_path, selection, confidence=60, line_word_max_deviation=5)->List[TextPosition]:
+def extract_column_data(image_path, selection, skip_words=[], confidence=60, line_word_max_deviation=5)->List[TextPosition]:
     selection_x1, selection_y1, selection_x2, selection_y2 = selection
 
     # Read the image using OpenCV
@@ -60,6 +60,10 @@ def extract_column_data(image_path, selection, confidence=60, line_word_max_devi
             y = int(data['top'][i])
             w = int(data['width'][i])
             h = int(data['height'][i])
+
+            # Skip if it's any of "skip words"
+            if text in skip_words:
+                continue
 
             # Get only selected data
             if x >= selection_x1 and x < selection_x2 and y >= selection_y1 and y < selection_y2:
@@ -104,7 +108,7 @@ def extract_column_data(image_path, selection, confidence=60, line_word_max_devi
 
 # Example usage
 image_path = '1_col1.jpg'
-data = extract_column_data(image_path, (0, 0, 5000, 5000), line_word_max_deviation=16, confidence=60)
+data = extract_column_data(image_path, (0, 0, 5000, 5000), skip_words=["+", "-"], line_word_max_deviation=16, confidence=60)
 
 for d in data:
     print(d.text)
