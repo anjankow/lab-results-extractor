@@ -8,3 +8,4 @@ venv
 
 *.jpg
 __pycache__/
+*.png

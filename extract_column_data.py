@@ -7,10 +7,18 @@ class WordData:
     def __init__(self, text: str, confidence: int, x: int, y: int, width: int, height: int):
         self.text = text
         self.confidence = confidence
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+        self.x1 = x
+        self.y1 = y
+        self.x2 = x + width
+        self.y2 = y + height
+
+class TextPosition:
+    def __init__(self, text: str, x1: int, y1: int, x2: int, y2: int):
+        self.text = text
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
 
 def separate_numbers_into_buckets(numbers: List[int], max_deviation=5):
     buckets = {}
@@ -33,8 +41,8 @@ def separate_numbers_into_buckets(numbers: List[int], max_deviation=5):
 
     return buckets
 
-def extract_column_data(image_path, selection, confidence=60, line_word_max_deviation=5):
-    x1, y1, x2, y2 = selection
+def extract_column_data(image_path, selection, confidence=60, line_word_max_deviation=5)->List[TextPosition]:
+    selection_x1, selection_y1, selection_x2, selection_y2 = selection
 
     # Read the image using OpenCV
     image = cv2.imread(image_path)
@@ -54,7 +62,7 @@ def extract_column_data(image_path, selection, confidence=60, line_word_max_devi
             h = int(data['height'][i])
 
             # Get only selected data
-            if x >= x1 and x < x2 and y >= y1 and y < y2:
+            if x >= selection_x1 and x < selection_x2 and y >= selection_y1 and y < selection_y2:
                 y_positions.append(y)
                 processed_data[y] = WordData(text, data['conf'][i], x, y, w, h)
 
@@ -65,22 +73,38 @@ def extract_column_data(image_path, selection, confidence=60, line_word_max_devi
         words = {} # {position_x: WordData}, word within a single line
         for y in y_positions:
             word_data = processed_data[y]
-            words[word_data.x] = word_data
+            words[word_data.x1] = word_data
         line_words[bucket_idx] = words
 
-        print(f"Bucket {bucket_idx}, words: {list(map(lambda word: word[1].text, words.items()))}")
+        # print(f"Bucket {bucket_idx}, words: {list(map(lambda word: word[1].text, words.items()))}")
 
+    # This will be returned to the user
+    ret_words = []
     for line_idx, words_dict in line_words.items():
-        print(line_idx)
-        print(words_dict)
         line_text = ''
+        line_text_position = [selection_x2, selection_y2, selection_x1, selection_y1]
+
         for _, word in sorted(words_dict.items()):
             line_text += ' ' + word.text
+            line_text_position[0] = min(word.x1, line_text_position[0])
+            line_text_position[1] = min(word.y1, line_text_position[1])
+            line_text_position[2] = max(word.x2, line_text_position[2])
+            line_text_position[3] = max(word.y2, line_text_position[3])
 
-        print(f"Line {line_idx}: {line_text}")
         line_words[line_idx] = line_text
-        print(f"Line {line_idx}: {line_words[line_idx]}\n")
+        # print(f"Line {line_idx}: {line_words[line_idx]}\n")
+
+        ret_words.append(TextPosition(line_text, *line_text_position))
+
+    return ret_words
+
+
+
+
 
 # Example usage
 image_path = '1_col1.jpg'
-extract_column_data(image_path, (0, 0, 500, 5000), line_word_max_deviation=16, confidence=60)
+data = extract_column_data(image_path, (0, 0, 5000, 5000), line_word_max_deviation=16, confidence=60)
+
+for d in data:
+    print(d.text)
