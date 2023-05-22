@@ -22,11 +22,12 @@ def draw_word_boxes(image_path: str, output_path: str, confidence: int, config="
             w = data['width'][i]
             h = data['height'][i]
             cv2.rectangle(image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            # cv2.putText(image_rgb, f"B: {data['block_num'][i]} L: {x} T: {y}", (x,y), fontFace=None, fontScale=1, color=(255,0,255))
 
     # Save the image with word boxes
     plt.imsave(output_path, image_rgb)
 
 # # Example usage
-# image_path = '1.JPG'
+# image_path = '5.JPG'
 # output_path = 'tmp.jpg'
 # draw_word_boxes(image_path, output_path, 40)
