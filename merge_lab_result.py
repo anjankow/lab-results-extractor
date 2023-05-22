@@ -1,6 +1,6 @@
 import bisect
 from typing import List, Tuple
-from extract_column_data import TextPosition, separate_numbers_into_buckets
+from extract_column_data import TextPosition, text_position_equals
 
 class LabResult:
     def __init__(self, label: str = '', result: float='0.0', unit: str=''):
@@ -26,12 +26,13 @@ def merge_lab_result(labels: List[TextPosition], results: List[TextPosition],uni
             result_unit, unit = results_units[resultunits_idx]
 
             # if the result is common, they all are placed in the same line
-            if result_label.equals(result_unit):
+            if text_position_equals(result_label, result_unit):
                 ret.append(LabResult(label, result_label, unit))
                 labelresults_idx += 1
                 resultunits_idx += 1
                 break
 
+            # TODO: check for possible None of each values
             # otherwise, either tuple of the other one comes first
             if result_label.y2 - result_unit.y2 < 0:
                 # value from result_label comes first
@@ -55,31 +56,30 @@ def merge_two_columns(column_before: List[TextPosition], column_after: List[Text
     while column_before_idx < len(column_before):
 
         column_before_y = column_before[column_before_idx].y2
-
-        while column_after_idx < len(column_after):
-
+        if column_after_idx < len(column_after):
             column_after_y = column_after[column_after_idx].y1
 
-            # if words are in the same line, append them together
-            if abs(column_after_y - column_before_y) <= line_word_max_deviation:
-                res.append((column_before[column_before_idx], column_after[column_after_idx]))
-                column_before_idx += 1
-                column_after_idx += 1
-                break
+        # if words are in the same line, append them together
+        if abs(column_after_y - column_before_y) <= line_word_max_deviation:
+            res.append((column_before[column_before_idx], column_after[column_after_idx]))
+            column_before_idx += 1
+            column_after_idx += 1
+            continue
 
-            # if words are lying to far basing on y coordinate, they have to be added separately
-            # but which one comes first?
-            # y is 0 on the top of the page
-            if column_after_y - column_before_y < 0:
-                # value from column_after comes first
-                res.append((None, column_after[column_after_idx]))
-                column_after_idx += 1
-                continue
-            else:
-                # value from column_before comes first
-                res.append((column_before[column_before_idx], None))
-                column_before_idx += 1
-                break
+        # if words are lying to far basing on y coordinate, they have to be added separately
+        # but which one comes first?
+        # y is 0 on the top of the page
+        if column_before_y - column_after_y < 0 or column_after_idx >= len(column_after):
+            # value from column_before_y comes first
+            res.append((column_before[column_before_idx], None))
+            column_before_idx += 1
+            continue
+
+        # else value from column_after comes first
+        while column_after_idx < len(column_after) and column_before_y - column_after[column_after_idx].y1 > 0:
+            column_after[column_after_idx].y1
+            res.append((None, column_after[column_after_idx]))
+            column_after_idx += 1
 
     return res
 
