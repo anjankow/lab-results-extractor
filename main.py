@@ -30,28 +30,28 @@ for i in [1]:
 
     # get coordinates from image_to_show that has already boxes drawn on it
 
-    # # 1. Result labels
-    # labels_coordinates = user_select_image_area(image_to_show, 'Select result labels')
-    # # 2. Result numbers
-    # results_coordinates = user_select_image_area(image_to_show, 'Select result numbers')
-    # # 3. Units
-    # units_coordinates = user_select_image_area(image_to_show, 'Select result units')
+    # 1. Result labels
+    labels_coordinates = user_select_image_area(image_to_show, 'Select result labels')
+    # 2. Result numbers
+    results_coordinates = user_select_image_area(image_to_show, 'Select result numbers')
+    # 3. Units
+    units_coordinates = user_select_image_area(image_to_show, 'Select result units')
 
     # Now get data from these selections
     data = get_image_data(processed_image, config="--oem 3 --psm 6")
     print('Extracted image data')
 
-    labels_coordinates = (334.332980972516, 1532.6585623678643, 1470.9080338266385, 3648.514799154334)
-    labels = extract_column_from_data(data, labels_coordinates, skip_words=['+', '-'], confidence=60, line_word_max_deviation=5)
+    # labels_coordinates = (334.332980972516, 1532.6585623678643, 1470.9080338266385, 3648.514799154334)
+    labels = extract_column_from_data(data, labels_coordinates, skip_words=['+', '-'], confidence=60, line_word_max_deviation=20)
     print('Extracted labels')
-    results_coordinates = (1486,1654,  1866, 4662)
-    results = extract_column_from_data(data, results_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=5)
+    # results_coordinates = (1486,1654,  1866, 4662)
+    results = extract_column_from_data(data, results_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
     print('Extracted results')
-    units_coordinates = (1881.9016913319238, 1583.3985200845664, 2171.1194503171246, 3597.774841437632)
-    units = extract_column_from_data(data, units_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=5)
+    # units_coordinates = (1881.9016913319238, 1583.3985200845664, 2171.1194503171246, 3597.774841437632)
+    units = extract_column_from_data(data, units_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
     print('Extracted units')
 
-    lab_results = merge_lab_result(labels, results, units)
-    for line in lab_results:
-        print(f"{line.label}  {line.result}  {line.unit}")
+    lab_results = merge_lab_result(labels, results, units, 15)
+    for i, line in enumerate(lab_results):
+        print(f"{i}:   {line.label}  {line.result}  {line.unit}")
     print(len(lab_results))
