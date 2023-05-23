@@ -32,9 +32,45 @@ def merge_lab_result(labels: List[TextPosition], results: List[TextPosition],uni
                 resultunits_idx += 1
                 break
 
-            # TODO: check for possible None of each values
-            # otherwise, either tuple of the other one comes first
-            if result_label.y2 - result_unit.y2 < 0:
+            if result_label is None or result_unit is None:
+                if result_label is None and result_unit is not None:
+                    # use only result unit
+                    ret.append(LabResult('', result_unit, unit))
+                    resultunits_idx += 1
+                    continue
+                elif result_label is not None and result_unit is None:
+                    # use only result label
+                    ret.append(LabResult(label, result_label, ''))
+                    labelresults_idx += 1
+                    break
+                else:
+                    # both are none, use only label and only unit, check which one comes first
+                    # DANGER: without the result in between, their y value might differ more than
+                    # line_word_max_deviation and therefore will be assumed to lye in different lines
+                    # even if that is not true
+                    label_y = label.y1
+                    unit_y = unit.y1
+                    if abs(label_y - unit_y) <= line_word_max_deviation:
+                        # assumed to be in the same line
+                        ret.append(LabResult(label, 0, unit))
+                        labelresults_idx += 1
+                        resultunits_idx += 1
+                        break
+
+                    if label_y - unit_y < 0:
+                        # label comes first
+                        ret.append(LabResult(label, 0, ''))
+                        labelresults_idx += 1
+                        break
+                    else:
+                        # unit comes first
+                        ret.append(LabResult('', 0, unit))
+                        resultunits_idx += 1
+                        continue
+
+            # at this point we know that both result_label and result_unit are not null
+
+            if result_label.y1 - result_unit.y1 < 0:
                 # value from result_label comes first
                 ret.append(LabResult(label, result_label, ''))
                 labelresults_idx += 1
@@ -55,7 +91,7 @@ def merge_two_columns(column_before: List[TextPosition], column_after: List[Text
     res: List[Tuple[TextPosition,TextPosition]] = []
     while column_before_idx < len(column_before):
 
-        column_before_y = column_before[column_before_idx].y2
+        column_before_y = column_before[column_before_idx].y1
         if column_after_idx < len(column_after):
             column_after_y = column_after[column_after_idx].y1
 
