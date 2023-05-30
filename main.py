@@ -28,6 +28,11 @@ def extract_data(file: str):
     from pathlib import Path
     file_name = Path(file).stem
 
+    # check if should extract reference values
+    get_ref_values = False
+    if len(sys.argv) >= 3:
+        get_ref_values = sys.argv[2] == "ref"
+
     image_to_show = 'tmp.jpg'
     processed_image = f'{file_name}_out.jpg'
 
@@ -66,7 +71,14 @@ def extract_data(file: str):
     units = extract_column_from_data(data, units_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
     print('Extracted units')
 
-    return merge_lab_result(labels, results, units, 15)
+    # 4. References
+    references = None
+    if get_ref_values:
+        references_coordinates = user_select_image_area(image_to_show, 'Select reference values')
+        references = extract_column_from_data(data, references_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
+        print('Extracted reference values')
+
+    return merge_lab_result(labels, results, units, references, 15)
 
 def save_lab_results_csv(filename: str, out_file: str, lab_results: List[LabResult]):
     for i, line in enumerate(lab_results):
@@ -75,9 +87,9 @@ def save_lab_results_csv(filename: str, out_file: str, lab_results: List[LabResu
 
     with open(out_file, 'w') as fout:
         writer = csv.writer(fout)
-        writer.writerow(['labels', 'results', 'units'])
+        writer.writerow(['Labels', 'Results', 'Units', 'Ref value min', 'Ref value max'])
         for line in lab_results:
-            writer.writerow([line.label, line.result, line.unit])
+            writer.writerow([line.label, line.result, line.unit, line.ref_value_min, line.ref_value_max])
 
 
 from translate import Translator

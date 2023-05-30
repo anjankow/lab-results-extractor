@@ -1,10 +1,12 @@
 import numpy as np
 import sys
-import bisect
-from typing import List, Tuple
-from extract_column_data import TextPosition, text_position_equals
+from typing import List
+from extract_column_data import TextPosition
 
 class LabResult:
+    ref_value_min = ''
+    ref_value_max = ''
+
     def __init__(self, label: TextPosition, result: TextPosition, unit: TextPosition):
         if label is None:
             self.label = ''
@@ -21,6 +23,22 @@ class LabResult:
         else:
             self.unit = unit.text
 
+    def set_ref_value(self, text: str):
+        if text is not None:
+            if text.lstrip().startswith('<'):
+                self.ref_value_max = text.split('<')[1]
+            elif text.lstrip().startswith('>'):
+                self.ref_value_min = text.split('>')[1]
+            splitted = text.split('-', 1)
+            if len(splitted) == 2:
+                min, max = splitted
+                self.ref_value_min = min
+                self.ref_value_max = max
+
+# a = LabResult(None, None, None)
+# a.set_ref_value(' >234  ')
+# print(a.ref_value_min)
+# print(a.ref_value_max)
 
 class _ColumnData:
     def __init__(self, column_data: List[TextPosition]):
@@ -41,12 +59,17 @@ class _ColumnData:
             return None
 
 # merge text that lies in the same line basing on the y coordinate
-def merge_lab_result(labels: List[TextPosition], results: List[TextPosition], units: List[TextPosition], max_line_deviation=10.)->List[LabResult]:
+def merge_lab_result(labels: List[TextPosition], results: List[TextPosition], units: List[TextPosition], references: List[TextPosition], max_line_deviation=10.)->List[LabResult]:
     data = [_ColumnData(labels), _ColumnData(results), _ColumnData(units)]
+    if references is not None:
+        data.append(_ColumnData(references))
     data_merged = merge_text_positions(data, max_line_deviation)
     res: List[LabResult] = []
     for line in data_merged:
-        res.append(LabResult(line[0], line[1], line[2]))
+        lab_result = LabResult(line[0], line[1], line[2])
+        if len(line) > 3 and line[3] is not None:
+            lab_result.set_ref_value(line[3].text)
+        res.append(lab_result)
 
     return res
 
