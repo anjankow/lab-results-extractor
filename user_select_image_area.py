@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from PIL import Image, ImageOps
 
+from coordinates_saver import *
+
 class RectangleSelector:
     def __init__(self, ax):
         self.ax = ax
@@ -52,7 +54,12 @@ class RectangleSelector:
             self.start_x = None
             self.start_y = None
 
-def user_select_image_area(image_path, title='Select a region of interest')->Tuple[int, int, int, int]:
+def user_select_image_area(image_path, title='Select a region of interest', overwrite=False)->Tuple[int, int, int, int]:
+    if not overwrite:
+        coordinates = get_saved_coordinates(image_path, title)
+        if coordinates is not None:
+            return coordinates
+
     # Open the image using PIL
     img = Image.open(image_path)
     img = ImageOps.exif_transpose(img)
@@ -77,7 +84,9 @@ def user_select_image_area(image_path, title='Select a region of interest')->Tup
         x2 = x1 + rectangle_selector.rect.get_width()
         y2 = y1 + rectangle_selector.rect.get_height()
 
-        return (x1, y1, x2, y2)
+        coordinates = (x1, y1, x2, y2)
+        save_coordinates(image_path, title, coordinates)
+        return coordinates
 
 
 def crop_image(image_path, cropped_image_path, coordinates_tuple: tuple):
