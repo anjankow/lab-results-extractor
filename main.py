@@ -29,9 +29,9 @@ def extract_data(file: str):
     file_name = Path(file).stem
 
     # check if should extract reference values
-    get_ref_values = False
+    skip_ref_values = False
     if len(sys.argv) >= 3:
-        get_ref_values = sys.argv[2] == "ref"
+        skip_ref_values = sys.argv[2] == "no-ref"
 
     image_to_show = 'tmp.jpg'
     processed_image = f'{file_name}_out.jpg'
@@ -73,7 +73,7 @@ def extract_data(file: str):
 
     # 4. References
     references = None
-    if get_ref_values:
+    if not skip_ref_values:
         references_coordinates = user_select_image_area(image_to_show, 'Select reference values')
         references = extract_column_from_data(data, references_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
         print('Extracted reference values')
