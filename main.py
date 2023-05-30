@@ -33,7 +33,7 @@ def extract_data(file: str):
     if len(sys.argv) >= 3:
         skip_ref_values = sys.argv[2] == "no-ref"
 
-    image_to_show = 'tmp.jpg'
+    image_to_show = f'{file_name}_boxes.jpg'
     processed_image = f'{file_name}_out.jpg'
 
     threshold = 127
@@ -59,16 +59,26 @@ def extract_data(file: str):
     data = get_image_data(processed_image, config="--oem 3 --psm 6")
     print('Extracted image data')
 
-    # labels_coordinates = (334.332980972516, 1532.6585623678643, 1470.9080338266385, 3648.514799154334)
-    labels = extract_column_from_data(data, labels_coordinates, skip_words=['+', '-'], confidence=60, line_word_max_deviation=20)
+    labels = extract_column_from_data(data, labels_coordinates,
+                                      skip_words=['+', '-'],
+                                      confidence=60,
+                                      line_word_max_deviation=20)
     # translate labels to English
     labels = translate_labels(labels)
     print('Extracted labels')
-    # results_coordinates = (1486,1654,  1866, 4662)
-    results = extract_column_from_data(data, results_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
+
+    results = extract_column_from_data(data,
+                                       results_coordinates,
+                                       skip_words=['|', '.'],
+                                       confidence=60,
+                                       line_word_max_deviation=20)
     print('Extracted results')
-    # units_coordinates = (1881.9016913319238, 1583.3985200845664, 2171.1194503171246, 3597.774841437632)
-    units = extract_column_from_data(data, units_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
+
+    units = extract_column_from_data(data,
+                                     units_coordinates,
+                                     skip_words=['|', '.'],
+                                     confidence=60,
+                                     line_word_max_deviation=20)
     print('Extracted units')
 
     # 4. References
