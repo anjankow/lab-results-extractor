@@ -1,5 +1,8 @@
+import goslate
+import sys
+from os.path import exists
 import pandas as pd
-import pytesseract
+import csv
 import cv2 as cv
 
 from user_select_image_area import *
@@ -7,22 +10,32 @@ from apply_threshold import apply_threshold
 from draw_word_boxes import draw_word_boxes
 from extract_column_data import *
 from remove_shadow import remove_shadow
-from merge_lab_result import merge_lab_result
+from merge_lab_result import merge_lab_result, LabResult
 
-file_name = '5.jpeg'
 
-for i in [1]:
-    file_name = f'{i}.jpg'
-    tsv_file_name = f'test{i}.tsv'
+def get_file()->str:
+    if len(sys.argv) < 2:
+        print('Usage: <script name>.py <file to process>')
+        exit(1)
+    file = sys.argv[1]
+    if not exists(file):
+        print('Given file is not found')
+        exit(1)
+
+    return file
+
+def extract_data(file: str):
+    from pathlib import Path
+    file_name = Path(file).stem
 
     image_to_show = 'tmp.jpg'
-    processed_image = f'{i}_out.jpg'
+    processed_image = f'{file_name}_out.jpg'
 
     threshold = 127
     confidence = 40
 
-    print('Processing '+file_name)
-    apply_threshold(file_name, processed_image, threshold)
+    print('Processing '+file)
+    apply_threshold(file, processed_image, threshold)
     remove_shadow(processed_image, processed_image)
     print('Applied threshold')
     draw_word_boxes(processed_image, image_to_show, confidence)
@@ -43,6 +56,8 @@ for i in [1]:
 
     # labels_coordinates = (334.332980972516, 1532.6585623678643, 1470.9080338266385, 3648.514799154334)
     labels = extract_column_from_data(data, labels_coordinates, skip_words=['+', '-'], confidence=60, line_word_max_deviation=20)
+    # translate labels to English
+    labels = translate_labels(labels)
     print('Extracted labels')
     # results_coordinates = (1486,1654,  1866, 4662)
     results = extract_column_from_data(data, results_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
@@ -51,7 +66,37 @@ for i in [1]:
     units = extract_column_from_data(data, units_coordinates, skip_words=['|', '.'], confidence=60, line_word_max_deviation=10)
     print('Extracted units')
 
-    lab_results = merge_lab_result(labels, results, units, 15)
+    return merge_lab_result(labels, results, units, 15)
+
+def save_lab_results_csv(filename: str, out_file: str, lab_results: List[LabResult]):
     for i, line in enumerate(lab_results):
         print(f"{i}:   {line.label}  {line.result}  {line.unit}")
     print(len(lab_results))
+
+    with open(out_file, 'w') as fout:
+        writer = csv.writer(fout)
+        writer.writerow(['labels', 'results', 'units'])
+        for line in lab_results:
+            writer.writerow([line.label, line.result, line.unit])
+
+
+from translate import Translator
+translator= Translator(from_lang="German", to_lang="English")
+def translate_de_to_eng(src: str)->str:
+    return translator.translate(src)
+
+def translate_labels(text_positions: List[TextPosition]) -> List[TextPosition]:
+    for p in text_positions:
+        try:
+            translated = translate_de_to_eng(p.text)
+            p.text = translated
+        except:
+            print('Failed to translate: '+p.text)
+            continue
+
+    return text_positions
+
+if __name__ == "__main__":
+    file = get_file()
+    data = extract_data(file)
+    save_lab_results_csv(file, f"{file}_out.csv", data)
