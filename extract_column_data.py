@@ -2,7 +2,6 @@
 from typing import Dict, List
 import pytesseract
 import cv2
-import numpy as np
 
 class WordData:
     def __init__(self, text: str, confidence: int, x: int, y: int, width: int, height: int):

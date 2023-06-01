@@ -1,4 +1,3 @@
-import numpy as np
 import sys
 from typing import List
 from extract_column_data import TextPosition

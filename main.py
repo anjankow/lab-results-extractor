@@ -1,9 +1,6 @@
-import goslate
 import sys
 from os.path import exists
-import pandas as pd
 import csv
-import cv2 as cv
 
 from user_select_image_area import *
 from apply_threshold import apply_threshold

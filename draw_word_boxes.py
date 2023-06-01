@@ -1,6 +1,5 @@
 import cv2
 import pytesseract
-import numpy as np
 import matplotlib.pyplot as plt
 
 def draw_word_boxes(image_path: str, output_path: str, confidence: int, config="--oem 3 --psm 6"):
